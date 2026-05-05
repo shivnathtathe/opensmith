@@ -129,3 +129,65 @@ def test_nested_trace_sets_parent_id_correctly(monkeypatch, tmp_storage: Storage
     inner_trace = next(item for item in traces if item["name"] == "inner")
 
     assert inner_trace["parent_id"] == outer_trace["id"]
+
+
+@pytest.mark.asyncio
+async def test_trace_async_function(monkeypatch, tmp_storage: Storage) -> None:
+    monkeypatch.setattr("opensmith.tracer.Storage", lambda: tmp_storage)
+
+    @trace
+    async def sample(value: str) -> str:
+        return f"ok:{value}"
+
+    result = await sample("async")
+
+    traces = tmp_storage.get_traces()
+    assert result == "ok:async"
+    assert len(traces) == 1
+    assert traces[0]["name"] == "sample"
+    assert traces[0]["input"] == {
+        "args": ["async"],
+        "kwargs": {},
+    }
+    assert traces[0]["output"] == {"result": "ok:async"}
+    assert traces[0]["error"] is None
+
+
+@pytest.mark.asyncio
+async def test_trace_async_reraises(monkeypatch, tmp_storage: Storage) -> None:
+    monkeypatch.setattr("opensmith.tracer.Storage", lambda: tmp_storage)
+
+    @trace
+    async def sample() -> None:
+        raise RuntimeError("async boom")
+
+    with pytest.raises(RuntimeError):
+        await sample()
+
+    traces = tmp_storage.get_traces()
+    assert len(traces) == 1
+    assert traces[0]["name"] == "sample"
+    assert "RuntimeError" in traces[0]["error"]
+
+
+def test_trace_decorator_with_tags(monkeypatch, tmp_storage: Storage) -> None:
+    monkeypatch.setattr("opensmith.tracer.Storage", lambda: tmp_storage)
+
+    @trace(tags=["production", "rag"])
+    def sample() -> str:
+        return "ok"
+
+    sample()
+
+    traces = tmp_storage.get_traces()
+    assert traces[0]["tags"] == ["production", "rag"]
+
+
+def test_context_manager_with_tags(tmp_storage: Storage) -> None:
+    local_trace = TraceCallable(storage=tmp_storage)
+
+    with local_trace("context", tags=["debug"]) as t:
+        t.log("query", "hello")
+
+    traces = tmp_storage.get_traces()
+    assert traces[0]["tags"] == ["debug"]

@@ -24,3 +24,16 @@ opensmith ui
 | DELETE | `/api/traces` | Clear all traces |
 
 The dashboard only serves local data from SQLite.
+
+## Tags
+
+Traces can include tags, which are stored in SQLite and returned by the trace API.
+
+```python
+from opensmith import trace
+
+
+@trace(tags=["production", "rag"])
+def pipeline(query: str):
+    return run_pipeline(query)
+```

@@ -58,13 +58,27 @@ def my_pipeline(question: str):
     return call_llm(docs + question)
 ```
 
+Async functions are supported:
+
+```python
+from opensmith import trace
+
+
+@trace(tags=["production", "rag"])
+async def call_llm(prompt: str):
+    return await openai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+    )
+```
+
 ### Example 2: context manager
 
 ```python
 from opensmith import trace
 
 
-with trace("my_pipeline") as t:
+with trace("my_pipeline", tags=["debug"]) as t:
     t.log("query", query)
     response = openai.chat.completions.create(
         model="gpt-4o-mini",
@@ -100,6 +114,34 @@ from opensmith import autopatch
 autopatch(exclude=["chromadb"])
 ```
 
+## Console mode
+
+Print trace results to the terminal as they complete:
+
+```python
+from opensmith import set_console_mode, trace
+
+
+set_console_mode(True)
+
+
+@trace
+def my_func():
+    return "ok"
+```
+
+## Configuration
+
+opensmith reads `opensmith.json` from the current working directory on import:
+
+```json
+{
+  "db_path": "./my_traces.db",
+  "console_mode": false,
+  "autopatch": ["openai", "qdrant"]
+}
+```
+
 ## Dashboard
 
 ```bash
@@ -132,7 +174,7 @@ Open `http://localhost:7823`.
 
 ## Storage
 
-Traces are stored locally at `~/.opensmith/traces.db`.
+Traces are stored locally at `~/.opensmith/traces.db` unless overridden with `opensmith.json` or `set_default_db_path()`.
 
 ## License
 

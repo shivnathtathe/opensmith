@@ -44,3 +44,15 @@ unpatch()
 | pinecone | pinecone-client | `Index.query`, `Index.upsert` |
 
 If a backend is not installed, opensmith skips it silently.
+
+## Configuration
+
+Autopatch can be enabled automatically from `opensmith.json`:
+
+```json
+{
+  "autopatch": ["openai", "qdrant"]
+}
+```
+
+The package applies this on import by calling `autopatch(only=[...])`.

@@ -31,3 +31,14 @@ Delete all stored traces after confirmation.
 ```bash
 opensmith clear
 ```
+
+## Console Mode
+
+Console mode is configured from Python code or `opensmith.json`, not a CLI command.
+
+```python
+from opensmith import set_console_mode
+
+
+set_console_mode(True)
+```

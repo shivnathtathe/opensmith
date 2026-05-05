@@ -6,6 +6,23 @@ opensmith stores traces in SQLite at:
 ~/.opensmith/traces.db
 ```
 
+You can override this path in code:
+
+```python
+from opensmith import set_default_db_path
+
+
+set_default_db_path("./my_traces.db")
+```
+
+Or with `opensmith.json`:
+
+```json
+{
+  "db_path": "./my_traces.db"
+}
+```
+
 ## Tables
 
 ### `traces`
@@ -23,6 +40,7 @@ opensmith stores traces in SQLite at:
 | parent_id | TEXT |
 | run_id | TEXT |
 | metadata | TEXT JSON |
+| tags | TEXT JSON |
 | created_at | REAL |
 
 ### `steps`

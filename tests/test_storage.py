@@ -105,3 +105,31 @@ def test_get_traces_respects_limit_param(tmp_storage: Storage) -> None:
     traces = tmp_storage.get_traces(limit=2)
 
     assert len(traces) == 2
+
+
+def test_save_trace_with_tags(tmp_storage: Storage) -> None:
+    trace = Trace(name="tagged", tags=["production", "rag"])
+
+    tmp_storage.save_trace(trace)
+
+    saved, _ = tmp_storage.get_trace(trace.id)
+    assert saved["tags"] == ["production", "rag"]
+
+
+def test_get_traces_filter_by_tag(tmp_storage: Storage) -> None:
+    tmp_storage.save_trace(Trace(name="rag", tags=["rag"]))
+    tmp_storage.save_trace(Trace(name="debug", tags=["debug"]))
+
+    traces = tmp_storage.get_traces(tags=["rag"])
+
+    assert len(traces) == 1
+    assert traces[0]["name"] == "rag"
+
+
+def test_get_traces_no_tag_filter_returns_all(tmp_storage: Storage) -> None:
+    tmp_storage.save_trace(Trace(name="rag", tags=["rag"]))
+    tmp_storage.save_trace(Trace(name="debug", tags=["debug"]))
+
+    traces = tmp_storage.get_traces()
+
+    assert len(traces) == 2

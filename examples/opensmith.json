@@ -1,0 +1,5 @@
+{
+  "db_path": "./example_traces.db",
+  "console_mode": true,
+  "autopatch": ["openai"]
+}

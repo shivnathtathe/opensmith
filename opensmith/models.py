@@ -41,6 +41,7 @@ class Trace(BaseModel):
     parent_id: str | None = None
     run_id: str | None = None
     metadata: dict[str, Any] | None = None
+    tags: list[str] = Field(default_factory=list)
     steps: list[Step] = Field(default_factory=list)
 
 

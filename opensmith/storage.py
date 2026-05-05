@@ -8,8 +8,19 @@ from typing import Any
 from opensmith.models import Step, Trace
 
 
+_default_db_path: Path | None = None
+
+
+def set_default_db_path(path: str | Path) -> None:
+    global _default_db_path
+    _default_db_path = Path(path).expanduser()
+
+
 class Storage:
     def __init__(self, db_path: Path | str | None = None) -> None:
+        if db_path is None:
+            db_path = _default_db_path
+
         if db_path is None:
             db_path = Path.home() / ".opensmith" / "traces.db"
 
@@ -38,7 +49,8 @@ class Storage:
                     parent_id TEXT,
                     run_id TEXT,
                     metadata TEXT,
-                    created_at REAL
+                    created_at REAL,
+                    tags TEXT
                 )
                 """
             )
@@ -65,6 +77,19 @@ class Storage:
                 )
                 """
             )
+            self._ensure_column(conn, "traces", "tags", "TEXT")
+
+    def _ensure_column(
+        self,
+        conn: sqlite3.Connection,
+        table: str,
+        column: str,
+        column_type: str,
+    ) -> None:
+        columns = conn.execute(f"PRAGMA table_info({table})").fetchall()
+        if any(row["name"] == column for row in columns):
+            return
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type}")
 
     def save_trace(self, trace: Trace) -> None:
         with self._connect() as conn:
@@ -82,9 +107,10 @@ class Storage:
                     parent_id,
                     run_id,
                     metadata,
-                    created_at
+                    created_at,
+                    tags
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     trace.id,
@@ -99,6 +125,7 @@ class Storage:
                     trace.run_id,
                     self._to_json(trace.metadata),
                     trace.start_time,
+                    self._to_json(trace.tags),
                 ),
             )
 
@@ -191,19 +218,31 @@ class Storage:
                 ),
             )
 
-    def get_traces(self, limit: int = 50) -> list[dict[str, Any]]:
+    def get_traces(
+        self,
+        limit: int = 50,
+        tags: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         with self._connect() as conn:
             rows = conn.execute(
                 """
                 SELECT *
                 FROM traces
                 ORDER BY COALESCE(created_at, start_time, 0) DESC
-                LIMIT ?
                 """,
-                (limit,),
             ).fetchall()
 
-        return [self._trace_row_to_dict(row) for row in rows]
+        traces = [self._trace_row_to_dict(row) for row in rows]
+
+        if tags:
+            tag_set = set(tags)
+            traces = [
+                trace
+                for trace in traces
+                if tag_set.intersection(trace.get("tags") or [])
+            ]
+
+        return traces[:limit]
 
     def get_trace(self, trace_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         with self._connect() as conn:
@@ -255,6 +294,7 @@ class Storage:
         data["input"] = self._from_json(data["input"])
         data["output"] = self._from_json(data["output"])
         data["metadata"] = self._from_json(data["metadata"])
+        data["tags"] = self._from_json(data.get("tags")) or []
         return data
 
     def _step_row_to_dict(self, row: sqlite3.Row) -> dict[str, Any]:
