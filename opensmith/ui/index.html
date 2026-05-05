@@ -5,620 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>opensmith</title>
   <style>
-    :root {
-      --bg: #0a0a0a;
-      --surface: #111111;
-      --border: #222222;
-      --text: #ededec;
-      --muted: #888888;
-      --accent: #6366f1;
-      --error: #ef4444;
-      --success: #22c55e;
-      --warning: #f59e0b;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    button {
-      color: inherit;
-      font: inherit;
-    }
-
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .app {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: 52px 1fr;
-    }
-
-    .topbar {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 24px;
-      padding: 0 20px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
-    }
-
-    .brand {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .logo {
-      font-size: 14px;
-      font-weight: 650;
-      letter-spacing: -0.02em;
-    }
-
-    .tagline {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .topright {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      white-space: nowrap;
-    }
-
-    .stats {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .stat-value {
-      color: var(--text);
-      margin-left: 5px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-    }
-
-    .text-button {
-      border: 0;
-      padding: 0;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-    }
-
-    .text-button:hover {
-      color: var(--text);
-    }
-
-    .text-button.danger {
-      color: var(--error);
-    }
-
-    .content {
-      padding: 14px 20px 24px;
-      overflow: auto;
-    }
-
-    .table-wrap {
-      border-top: 1px solid var(--border);
-      border-left: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    th,
-    td {
-      height: 36px;
-      padding: 0 10px;
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    th {
-      height: 32px;
-      color: var(--muted);
-      background: var(--bg);
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    tbody tr.trace-row {
-      cursor: pointer;
-    }
-
-    tbody tr.trace-row:hover td {
-      background: #141414;
-    }
-
-    tbody tr.trace-row.active td {
-      background: #151515;
-    }
-
-    .col-num { width: 48px; }
-    .col-name { width: auto; }
-    .col-latency { width: 130px; }
-    .col-tokens { width: 110px; }
-    .col-cost { width: 110px; }
-    .col-status { width: 90px; }
-    .col-time { width: 120px; }
-
-    .status-ok {
-      color: var(--success);
-      font-weight: 600;
-    }
-
-    .status-err {
-      color: var(--error);
-      font-weight: 600;
-    }
-
-    .empty {
-      padding: 56px 20px;
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .detail-row td {
-      height: auto;
-      padding: 0;
-      white-space: normal;
-      background: #0d0d0d;
-    }
-
-    .detail {
-      display: grid;
-      gap: 16px;
-      padding: 16px;
-    }
-
-    .io-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .section {
-      min-width: 0;
-      border: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    .section-title {
-      height: 32px;
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      border-bottom: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    pre {
-      margin: 0;
-      min-height: 112px;
-      max-height: 280px;
-      overflow: auto;
-      padding: 10px;
-      color: var(--text);
-      font-size: 12px;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .error-block {
-      border: 1px solid var(--error);
-      color: var(--error);
-      background: #120808;
-    }
-
-    .steps-table th,
-    .steps-table td {
-      height: 32px;
-    }
-
-    .steps-table .step-name { width: auto; }
-    .steps-table .step-type { width: 100px; }
-    .steps-table .step-model { width: 180px; }
-    .steps-table .step-latency { width: 110px; }
-    .steps-table .step-tokens { width: 100px; }
-    .steps-table .step-cost { width: 100px; }
-    .steps-table .step-status { width: 80px; }
-
-    .loading {
-      color: var(--muted);
-    }
-
-    @media (max-width: 860px) {
-      .app {
-        grid-template-rows: auto 1fr;
-      }
-
-      .topbar {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 12px;
-      }
-
-      .topright {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .stats {
-        flex-wrap: wrap;
-      }
-
-      .content {
-        padding: 12px;
-      }
-
-      .io-grid {
-        grid-template-columns: 1fr;
-      }
-
-      th,
-      td {
-        padding: 0 8px;
-      }
-
-      .col-latency,
-      .col-tokens,
-      .col-cost {
-        width: 96px;
-      }
-
-      .col-time {
-        width: 92px;
-      }
-    }
+    :root { --bg:#0a0a0a; --surface:#111111; --surface-2:#151515; --border:#222222; --border-strong:#2d2d2d; --text:#ededec; --muted:#888888; --muted-2:#5f5f5f; --accent:#6366f1; --error:#ef4444; --success:#22c55e; --warning:#f59e0b; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size:13px; line-height:1.45; }
+    button,input { font:inherit; } button { color:inherit; }
+    .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace; font-variant-numeric:tabular-nums; }
+    .app { min-height:100vh; display:block; }
+    .topbar { position:sticky; top:0; z-index:30; min-height:52px; display:grid; grid-template-columns:minmax(220px,1fr) auto; align-items:center; gap:24px; padding:0 20px; border-bottom:1px solid var(--border); background:var(--bg); }
+    .brand { display:flex; align-items:baseline; gap:10px; min-width:0; } .logo { font-size:14px; font-weight:650; letter-spacing:-.02em; } .tagline { color:var(--muted); font-size:12px; }
+    .topright { display:flex; align-items:center; gap:18px; white-space:nowrap; } .stats { display:flex; align-items:center; gap:14px; color:var(--muted); font-size:12px; } .stat-value { color:var(--text); margin-left:5px; }
+    .connection { display:inline-flex; align-items:center; gap:7px; color:var(--warning); font-size:11px; letter-spacing:.04em; text-transform:uppercase; } .connection-dot { width:7px; height:7px; background:var(--warning); border-radius:50%; } .connection.live { color:var(--success); } .connection.live .connection-dot { background:var(--success); }
+    .actions { display:flex; gap:12px; } .text-button { border:0; padding:0; background:transparent; color:var(--muted); cursor:pointer; } .text-button:hover { color:var(--text); } .text-button.danger { color:var(--error); }
+    .controls { position:sticky; top:52px; z-index:25; display:grid; grid-template-columns:minmax(260px,520px) 1fr auto; gap:14px; align-items:center; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--bg); }
+    .search { height:32px; width:100%; border:1px solid var(--border); border-radius:0; outline:none; background:var(--surface); color:var(--text); padding:0 10px; } .search:focus { border-color:var(--accent); }
+    .pill-row { display:flex; align-items:center; gap:8px; min-width:0; overflow:auto; } .pill { height:26px; border:1px solid var(--border); border-radius:0; background:transparent; color:var(--muted); padding:0 9px; cursor:pointer; white-space:nowrap; } .pill:hover { color:var(--text); border-color:var(--border-strong); } .pill.active { color:var(--text); border-color:var(--accent); background:#111126; }
+    .content { padding:14px 20px 24px; overflow:auto; } .table-wrap,.charts { border-top:1px solid var(--border); border-left:1px solid var(--border); background:var(--surface); }
+    table { width:100%; border-collapse:collapse; table-layout:fixed; } th,td { height:36px; padding:0 10px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); text-align:left; vertical-align:middle; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    th { height:32px; color:var(--muted); background:var(--bg); font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; }
+    tbody tr.trace-row { cursor:pointer; } tbody tr.trace-row:hover td { background:#141414; } tbody tr.trace-row.active td { background:#151515; } tbody tr.trace-row.flash td { animation:flash-new 1800ms ease-out; }
+    @keyframes flash-new { 0%{background:#191940;} 100%{background:transparent;} } @keyframes dots { 0%{content:"";}25%{content:".";}50%{content:"..";}75%{content:"...";}100%{content:"";} }
+    .col-num{width:48px}.col-name{width:auto}.col-model{width:180px}.col-latency{width:110px}.col-tokens{width:110px}.col-cost{width:110px}.col-status{width:90px}.col-time{width:120px}
+    .status-ok{color:var(--success);font-weight:600}.status-err{color:var(--error);font-weight:600}.status-running{color:var(--warning);font-weight:600}.dots::after{content:"";animation:dots 1.2s steps(4,end) infinite}
+    .empty { padding:56px 20px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); color:var(--muted); text-align:center; }
+    .detail-row td { height:auto; padding:0; white-space:normal; background:#0d0d0d; } .detail { display:grid; gap:16px; padding:16px; } .io-grid,.charts-grid,.step-detail { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .section { min-width:0; border:1px solid var(--border); background:var(--surface); } .section-title { height:32px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 10px; border-bottom:1px solid var(--border); color:var(--muted); font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; }
+    pre { margin:0; min-height:112px; max-height:280px; overflow:auto; padding:10px; color:var(--text); font-size:12px; white-space:pre-wrap; word-break:break-word; } .error-block { border:1px solid var(--error); color:var(--error); background:#120808; }
+    .steps{display:grid}.step-row{display:grid;grid-template-columns:minmax(220px,1fr) 90px 160px 160px 100px 100px 80px;min-height:34px;border-bottom:1px solid var(--border);cursor:pointer}.step-row:hover{background:#141414}.step-cell{display:flex;align-items:center;min-width:0;padding:0 10px;border-right:1px solid var(--border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.step-cell:last-child{border-right:0}
+    .latency-bar{position:relative;width:100%;height:18px;background:#0c0c0c;border:1px solid var(--border)}.latency-fill{height:100%;background:var(--accent)}.latency-label{position:absolute;inset:0;display:flex;align-items:center;padding-left:6px;color:var(--text);font-size:11px}.step-detail{border-bottom:1px solid var(--border);background:#0d0d0d;padding:12px}
+    .charts{margin-top:14px;border:1px solid var(--border)}.charts.hidden{display:none}.charts-grid{gap:0}.chart{min-width:0;border-right:1px solid var(--border)}.chart:last-child{border-right:0}.chart-body{padding:12px}svg{display:block;width:100%;height:180px}.chart-axis{stroke:var(--border-strong);stroke-width:1}.chart-bar{fill:var(--accent)}.chart-text{fill:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:10px}
+    @media (max-width:1040px){.topbar,.controls{position:static;grid-template-columns:1fr;padding:12px}.topright{align-items:flex-start;flex-direction:column;gap:10px}.stats{flex-wrap:wrap}.content{padding:12px}.io-grid,.charts-grid,.step-detail{grid-template-columns:1fr}.step-row{grid-template-columns:1fr 80px 120px 120px 80px 80px 70px}.col-model{width:130px}.col-latency,.col-tokens,.col-cost{width:92px}}
   </style>
 </head>
 <body>
   <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">opensmith</div>
-        <div class="tagline">Local-first LLM pipeline tracer</div>
-      </div>
-      <div class="topright">
-        <div class="stats mono">
-          <span>total traces<span class="stat-value" id="stat-traces">0</span></span>
-          <span>total steps<span class="stat-value" id="stat-steps">0</span></span>
-          <span>total tokens<span class="stat-value" id="stat-tokens">0</span></span>
-          <span>total cost<span class="stat-value" id="stat-cost">$0.000000</span></span>
-        </div>
-        <div class="actions">
-          <button class="text-button" id="refresh-btn" type="button">Refresh</button>
-          <button class="text-button danger" id="clear-btn" type="button">Clear All</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="content">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="col-num">#</th>
-              <th class="col-name">name</th>
-              <th class="col-latency">latency</th>
-              <th class="col-tokens">tokens</th>
-              <th class="col-cost">cost</th>
-              <th class="col-status">status</th>
-              <th class="col-time">time</th>
-            </tr>
-          </thead>
-          <tbody id="traces-body">
-            <tr>
-              <td colspan="7" class="empty">Loading traces...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
+    <header class="topbar"><div class="brand"><div class="logo">opensmith</div><div class="tagline">Local-first LLM pipeline tracer</div></div><div class="topright"><div class="stats mono"><span>total traces<span class="stat-value" id="stat-traces">0</span></span><span>steps<span class="stat-value" id="stat-steps">0</span></span><span>tokens<span class="stat-value" id="stat-tokens">0</span></span><span>cost<span class="stat-value" id="stat-cost">$0.000000</span></span></div><div class="connection" id="connection"><span class="connection-dot"></span><span id="connection-text">CONNECTING</span></div><div class="actions"><button class="text-button" id="refresh-btn" type="button">Refresh</button><button class="text-button danger" id="clear-btn" type="button">Clear All</button></div></div></header>
+    <section class="controls"><input class="search mono" id="search" placeholder="Search traces..." autocomplete="off"><div class="pill-row" id="filters"><button class="pill active" data-status="">All</button><button class="pill" data-status="ok">OK</button><button class="pill" data-status="err">ERR</button></div><button class="text-button charts-toggle" id="charts-toggle" type="button">Hide Charts</button></section>
+    <main class="content"><div class="table-wrap"><table><thead><tr><th class="col-num">#</th><th class="col-name">name</th><th class="col-model">model</th><th class="col-latency">latency</th><th class="col-tokens">tokens</th><th class="col-cost">cost</th><th class="col-status">status</th><th class="col-time">time</th></tr></thead><tbody id="traces-body"><tr><td colspan="8" class="empty">Loading traces...</td></tr></tbody></table></div><section class="charts" id="charts"><div class="charts-grid"><div class="chart"><div class="section-title">Latency: last 20 traces</div><div class="chart-body" id="latency-chart"></div></div><div class="chart"><div class="section-title">Tokens: last 20 traces</div><div class="chart-body" id="tokens-chart"></div></div></div></section></main>
   </div>
-
   <script>
-    const state = {
-      traces: [],
-      expandedId: null,
-      details: new Map()
-    };
-
-    const tracesBody = document.getElementById("traces-body");
-    const refreshBtn = document.getElementById("refresh-btn");
-    const clearBtn = document.getElementById("clear-btn");
-
-    refreshBtn.addEventListener("click", () => loadAll());
-    clearBtn.addEventListener("click", clearAll);
-
-    loadAll();
-    setInterval(loadAll, 30000);
-
-    async function loadAll() {
-      await Promise.all([loadStats(), loadTraces()]);
-    }
-
-    async function loadStats() {
-      const stats = await fetchJson("/api/stats");
-      document.getElementById("stat-traces").textContent = formatNumber(stats.total_traces);
-      document.getElementById("stat-steps").textContent = formatNumber(stats.total_steps);
-      document.getElementById("stat-tokens").textContent = formatNumber(stats.total_tokens);
-      document.getElementById("stat-cost").textContent = formatCost(stats.total_cost_usd);
-    }
-
-    async function loadTraces() {
-      state.traces = await fetchJson("/api/traces?limit=100");
-      renderTraces();
-    }
-
-    async function clearAll() {
-      if (!confirm("Clear all traces?")) {
-        return;
-      }
-
-      await fetch("/api/traces", { method: "DELETE" });
-      state.expandedId = null;
-      state.details.clear();
-      await loadAll();
-    }
-
-    async function toggleTrace(traceId) {
-      if (state.expandedId === traceId) {
-        state.expandedId = null;
-        renderTraces();
-        return;
-      }
-
-      state.expandedId = traceId;
-
-      if (!state.details.has(traceId)) {
-        state.details.set(traceId, { loading: true });
-        renderTraces();
-
-        const detail = await fetchJson(`/api/traces/${encodeURIComponent(traceId)}`);
-        state.details.set(traceId, detail);
-      }
-
-      renderTraces();
-    }
-
-    function renderTraces() {
-      tracesBody.innerHTML = "";
-
-      if (!state.traces.length) {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td colspan="7" class="empty">No traces recorded yet.</td>`;
-        tracesBody.appendChild(row);
-        return;
-      }
-
-      state.traces.forEach((trace, index) => {
-        const row = document.createElement("tr");
-        row.className = `trace-row ${state.expandedId === trace.id ? "active" : ""}`;
-        row.addEventListener("click", () => toggleTrace(trace.id));
-
-        row.innerHTML = `
-          <td class="mono">${index + 1}</td>
-          <td title="${escapeAttr(trace.name || "")}">${escapeHtml(trace.name || "")}</td>
-          <td class="mono">${formatLatency(trace.latency_ms)}</td>
-          <td class="mono">${formatNumber(trace.tokens_total || 0)}</td>
-          <td class="mono">${formatCost(trace.cost_usd || 0)}</td>
-          <td class="${trace.error ? "status-err" : "status-ok"}">${trace.error ? "ERR" : "OK"}</td>
-          <td class="mono">${relativeTime(trace.created_at || trace.start_time)}</td>
-        `;
-
-        tracesBody.appendChild(row);
-
-        if (state.expandedId === trace.id) {
-          tracesBody.appendChild(renderDetailRow(trace.id));
-        }
-      });
-    }
-
-    function renderDetailRow(traceId) {
-      const row = document.createElement("tr");
-      row.className = "detail-row";
-
-      const cell = document.createElement("td");
-      cell.colSpan = 7;
-
-      const detail = state.details.get(traceId);
-      if (!detail || detail.loading) {
-        cell.innerHTML = `<div class="detail loading mono">Loading trace...</div>`;
-        row.appendChild(cell);
-        return row;
-      }
-
-      const trace = detail.trace || {};
-      const steps = detail.steps || [];
-
-      cell.innerHTML = `
-        <div class="detail">
-          ${trace.error ? `<pre class="error-block mono">${escapeHtml(trace.error)}</pre>` : ""}
-          <div class="io-grid">
-            <section class="section">
-              <div class="section-title">Input</div>
-              <pre class="mono">${escapeHtml(formatJson(trace.input))}</pre>
-            </section>
-            <section class="section">
-              <div class="section-title">Output</div>
-              <pre class="mono">${escapeHtml(formatJson(trace.output))}</pre>
-            </section>
-          </div>
-          <section class="section">
-            <div class="section-title">Steps</div>
-            ${renderStepsTable(steps)}
-          </section>
-        </div>
-      `;
-
-      row.appendChild(cell);
-      return row;
-    }
-
-    function renderStepsTable(steps) {
-      if (!steps.length) {
-        return `<div class="empty">No steps recorded for this trace.</div>`;
-      }
-
-      const rows = steps.map((step) => `
-        <tr>
-          <td class="step-name" title="${escapeAttr(step.name || "")}">${escapeHtml(step.name || "")}</td>
-          <td class="step-type">${escapeHtml(step.step_type || "")}</td>
-          <td class="step-model mono" title="${escapeAttr(step.model || "")}">${escapeHtml(step.model || "")}</td>
-          <td class="step-latency mono">${formatLatency(step.latency_ms)}</td>
-          <td class="step-tokens mono">${formatNumber(step.tokens_total || 0)}</td>
-          <td class="step-cost mono">${formatCost(step.cost_usd || 0)}</td>
-          <td class="step-status ${step.error ? "status-err" : "status-ok"}">${step.error ? "ERR" : "OK"}</td>
-        </tr>
-      `).join("");
-
-      return `
-        <table class="steps-table">
-          <thead>
-            <tr>
-              <th class="step-name">name</th>
-              <th class="step-type">type</th>
-              <th class="step-model">model</th>
-              <th class="step-latency">latency</th>
-              <th class="step-tokens">tokens</th>
-              <th class="step-cost">cost</th>
-              <th class="step-status">status</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
-    }
-
-    async function fetchJson(url, options) {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
-      }
-      return response.json();
-    }
-
-    function formatJson(value) {
-      if (value === null || value === undefined || value === "") {
-        return "";
-      }
-
-      try {
-        return JSON.stringify(value, null, 2);
-      } catch {
-        return String(value);
-      }
-    }
-
-    function formatLatency(value) {
-      if (value === null || value === undefined || value === "") {
-        return "";
-      }
-
-      const number = Number(value);
-      if (!Number.isFinite(number)) {
-        return "";
-      }
-
-      return number.toFixed(2);
-    }
-
-    function formatNumber(value) {
-      const number = Number(value || 0);
-      if (!Number.isFinite(number)) {
-        return "0";
-      }
-
-      return new Intl.NumberFormat().format(Math.round(number));
-    }
-
-    function formatCost(value) {
-      const number = Number(value || 0);
-      if (!Number.isFinite(number)) {
-        return "$0.000000";
-      }
-
-      return `$${number.toFixed(6)}`;
-    }
-
-    function relativeTime(timestamp) {
-      if (!timestamp) {
-        return "";
-      }
-
-      const seconds = Math.max(0, Math.floor(Date.now() / 1000 - Number(timestamp)));
-
-      if (seconds < 60) {
-        return `${seconds}s ago`;
-      }
-
-      const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) {
-        return `${minutes}m ago`;
-      }
-
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) {
-        return `${hours}h ago`;
-      }
-
-      const days = Math.floor(hours / 24);
-      return `${days}d ago`;
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function escapeAttr(value) {
-      return escapeHtml(value);
-    }
+    const state={traces:[],expandedId:null,details:new Map(),status:"",tag:"",q:"",flash:new Set(),charts:true,ws:null,reconnectMs:1000};
+    const $=id=>document.getElementById(id), body=$("traces-body"), filters=$("filters"), search=$("search");
+    $("refresh-btn").onclick=()=>loadAll(); $("clear-btn").onclick=clearAll; $("charts-toggle").onclick=toggleCharts; search.oninput=debounce(()=>{state.q=search.value.trim();loadTraces();},250);
+    filters.onclick=e=>{const b=e.target.closest("button"); if(!b)return; [...filters.querySelectorAll(".pill")].forEach(x=>x.classList.remove("active")); b.classList.add("active"); state.status=b.dataset.status||""; state.tag=b.dataset.tag||""; loadTraces();};
+    loadAll(); connectWs(); setInterval(()=>renderTraces(),30000);
+    async function loadAll(){await Promise.all([loadStats(),loadTraces()]);}
+    async function loadStats(){const s=await fetchJson("/api/stats"); $("stat-traces").textContent=fmtNum(s.total_traces); $("stat-steps").textContent=fmtNum(s.total_steps); $("stat-tokens").textContent=fmtNum(s.total_tokens); $("stat-cost").textContent=fmtCost(s.total_cost_usd);}
+    async function loadTraces(){const p=new URLSearchParams({limit:"100"}); if(state.q)p.set("q",state.q); if(state.status)p.set("status",state.status); if(state.tag)p.set("tags",state.tag); state.traces=await fetchJson(`/api/traces?${p}`); renderTagPills(); renderTraces(); renderCharts();}
+    async function clearAll(){if(!confirm("Clear all traces?"))return; await fetch("/api/traces",{method:"DELETE"}); state.expandedId=null; state.details.clear(); await loadAll();}
+    function connectWs(){setConn(false); const proto=location.protocol==="https:"?"wss":"ws"; const ws=new WebSocket(`${proto}://${location.host}/ws`); state.ws=ws; ws.onopen=()=>{state.reconnectMs=1000;setConn(true)}; ws.onmessage=e=>handleWs(JSON.parse(e.data)); ws.onclose=()=>reconnect(); ws.onerror=()=>{try{ws.close()}catch{}};}
+    function reconnect(){setConn(false); setTimeout(connectWs,state.reconnectMs); state.reconnectMs=Math.min(state.reconnectMs*1.5,10000);}
+    function setConn(live){$("connection").classList.toggle("live",live); $("connection-text").textContent=live?"LIVE":"CONNECTING";}
+    function handleWs(evt){if(!evt.trace)return; const i=state.traces.findIndex(t=>t.id===evt.trace.id); if(i>=0)state.traces[i]=evt.trace; else state.traces.unshift(evt.trace); state.flash.add(evt.trace.id); renderTraces(); renderCharts(); loadStats(); setTimeout(()=>{state.flash.delete(evt.trace.id);renderTraces();},1800);}
+    function renderTagPills(){const tags=[...new Set(state.traces.flatMap(t=>t.tags||[]))].sort(); const current=state.status||state.tag; filters.innerHTML=`<button class="pill ${!current?"active":""}" data-status="">All</button><button class="pill ${state.status==="ok"?"active":""}" data-status="ok">OK</button><button class="pill ${state.status==="err"?"active":""}" data-status="err">ERR</button>`+tags.map(t=>`<button class="pill ${state.tag===t?"active":""}" data-tag="${escAttr(t)}">#${esc(t)}</button>`).join("");}
+    function renderTraces(){body.innerHTML=""; if(!state.traces.length){body.innerHTML=`<tr><td colspan="8" class="empty">No traces found.</td></tr>`;return;} state.traces.forEach((t,i)=>{const r=document.createElement("tr"); r.className=`trace-row ${state.expandedId===t.id?"active":""} ${state.flash.has(t.id)?"flash":""}`; r.onclick=()=>toggleTrace(t.id); const running=!t.end_time&&!t.error; r.innerHTML=`<td class="mono">${i+1}</td><td title="${escAttr(t.name||"")}">${esc(t.name||"")}</td><td class="mono" title="${escAttr(t.model||"")}">${esc(t.model||"")}</td><td class="mono">${fmtLatency(t.latency_ms)}</td><td class="mono">${fmtNum(t.tokens_total||0)}</td><td class="mono">${fmtCost(t.cost_usd||0)}</td><td class="${running?"status-running":t.error?"status-err":"status-ok"}">${running?"RUNNING<span class='dots'></span>":t.error?"ERR":"OK"}</td><td class="mono">${relTime(t.created_at||t.start_time)}</td>`; body.appendChild(r); if(state.expandedId===t.id)body.appendChild(detailRow(t.id));});}
+    async function toggleTrace(id){if(state.expandedId===id){state.expandedId=null;renderTraces();return;} state.expandedId=id; if(!state.details.has(id)){state.details.set(id,{loading:true});renderTraces();state.details.set(id,await fetchJson(`/api/traces/${encodeURIComponent(id)}`));} renderTraces();}
+    function detailRow(id){const tr=document.createElement("tr"); tr.className="detail-row"; const td=document.createElement("td"); td.colSpan=8; const d=state.details.get(id); if(!d||d.loading){td.innerHTML=`<div class="detail mono">Loading trace...</div>`;tr.appendChild(td);return tr;} const trace=d.trace||{},steps=d.steps||[]; td.innerHTML=`<div class="detail">${trace.error?`<pre class="error-block mono">${esc(trace.error)}</pre>`:""}<div class="io-grid"><section class="section"><div class="section-title">Input</div><pre class="mono">${esc(json(trace.input))}</pre></section><section class="section"><div class="section-title">Output</div><pre class="mono">${esc(json(trace.output))}</pre></section></div><section class="section"><div class="section-title">Steps timeline</div>${stepsHtml(steps)}</section></div>`; tr.appendChild(td); return tr;}
+    function stepsHtml(steps){if(!steps.length)return `<div class="empty">No steps recorded.</div>`; const max=Math.max(...steps.map(s=>Number(s.latency_ms)||0),1); return `<div class="steps">${steps.map((s,i)=>`<div class="step-row" onclick="toggleStep(${i},this)"><div class="step-cell" title="${escAttr(s.name||"")}">${esc(s.name||"")}</div><div class="step-cell">${esc(s.step_type||"")}</div><div class="step-cell mono" title="${escAttr(s.model||"")}">${esc(s.model||"")}</div><div class="step-cell"><div class="latency-bar"><div class="latency-fill" style="width:${Math.max(3,(Number(s.latency_ms)||0)/max*100)}%"></div><div class="latency-label mono">${fmtLatency(s.latency_ms)}</div></div></div><div class="step-cell mono">${fmtNum(s.tokens_total||0)}</div><div class="step-cell mono">${fmtCost(s.cost_usd||0)}</div><div class="step-cell ${s.error?"status-err":"status-ok"}">${s.error?"ERR":"OK"}</div></div><div class="step-detail" hidden><section class="section"><div class="section-title">Step input</div><pre class="mono">${esc(json(s.input))}</pre></section><section class="section"><div class="section-title">Step output</div><pre class="mono">${esc(json(s.output||s.error))}</pre></section></div>`).join("")}</div>`;}
+    window.toggleStep=(i,row)=>{const d=row.nextElementSibling; if(d)d.hidden=!d.hidden;};
+    function renderCharts(){drawChart("latency-chart",state.traces.slice(0,20).reverse(),"latency_ms",v=>`${Math.round(v)}ms`); drawChart("tokens-chart",state.traces.slice(0,20).reverse(),"tokens_total",v=>fmtNum(v));}
+    function drawChart(id,rows,key,label){const max=Math.max(...rows.map(r=>Number(r[key])||0),1), w=640,h=180,p=20,bw=(w-p*2)/Math.max(rows.length,1); $(id).innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img"><line class="chart-axis" x1="${p}" y1="${h-p}" x2="${w-p}" y2="${h-p}"/>${rows.map((r,i)=>{const v=Number(r[key])||0,bh=(h-p*2)*(v/max),x=p+i*bw+3,y=h-p-bh;return `<rect class="chart-bar" x="${x}" y="${y}" width="${Math.max(2,bw-6)}" height="${bh}"><title>${escAttr(r.name)} ${label(v)}</title></rect>`}).join("")}</svg>`;}
+    function toggleCharts(){state.charts=!state.charts; $("charts").classList.toggle("hidden",!state.charts); $("charts-toggle").textContent=state.charts?"Hide Charts":"Show Charts";}
+    async function fetchJson(url,opt){const r=await fetch(url,opt); if(!r.ok)throw new Error(`Request failed: ${r.status}`); return r.json();}
+    function debounce(fn,ms){let t;return()=>{clearTimeout(t);t=setTimeout(fn,ms)}} function json(v){if(v==null||v==="")return"";try{return JSON.stringify(v,null,2)}catch{return String(v)}} function fmtLatency(v){const n=Number(v);return Number.isFinite(n)?`${n.toFixed(2)}ms`:""} function fmtNum(v){const n=Number(v||0);return Number.isFinite(n)?new Intl.NumberFormat().format(Math.round(n)):"0"} function fmtCost(v){const n=Number(v||0);return Number.isFinite(n)?`$${n.toFixed(6)}`:"$0.000000"} function relTime(ts){if(!ts)return"";const s=Math.max(0,Math.floor(Date.now()/1000-Number(ts)));if(s<60)return`${s}s ago`;const m=Math.floor(s/60);if(m<60)return`${m}m ago`;const h=Math.floor(m/60);if(h<24)return`${h}h ago`;return`${Math.floor(h/24)}d ago`} function esc(v){return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")} function escAttr(v){return esc(v)}
   </script>
 </body>
 </html>

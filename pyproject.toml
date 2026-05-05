@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "opensmith"
-version = "0.1.1"
+version = "0.1.2"
 description = "Local-first LLM pipeline tracer. No cloud. No setup."
 readme = "README.md"
 requires-python = ">=3.10"

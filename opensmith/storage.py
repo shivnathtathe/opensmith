@@ -222,14 +222,49 @@ class Storage:
         self,
         limit: int = 50,
         tags: list[str] | None = None,
+        q: str | None = None,
+        status: str | None = None,
     ) -> list[dict[str, Any]]:
+        conditions: list[str] = []
+        params: list[Any] = []
+
+        if q:
+            search = f"%{q}%"
+            conditions.append(
+                """
+                (
+                    traces.name LIKE ?
+                    OR traces.input LIKE ?
+                    OR traces.output LIKE ?
+                    OR traces.error LIKE ?
+                    OR traces.metadata LIKE ?
+                )
+                """
+            )
+            params.extend([search, search, search, search, search])
+
+        if status == "ok":
+            conditions.append("(traces.error IS NULL OR traces.error = '')")
+        elif status == "err":
+            conditions.append("(traces.error IS NOT NULL AND traces.error != '')")
+
+        where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
         with self._connect() as conn:
             rows = conn.execute(
-                """
-                SELECT *
+                f"""
+                SELECT
+                    traces.*,
+                    COALESCE(SUM(steps.tokens_total), 0) AS tokens_total,
+                    COALESCE(SUM(steps.cost_usd), 0) AS cost_usd,
+                    MAX(steps.model) AS model
                 FROM traces
-                ORDER BY COALESCE(created_at, start_time, 0) DESC
+                LEFT JOIN steps ON steps.trace_id = traces.id
+                {where_clause}
+                GROUP BY traces.id
+                ORDER BY COALESCE(traces.created_at, traces.start_time, 0) DESC
                 """,
+                params,
             ).fetchall()
 
         traces = [self._trace_row_to_dict(row) for row in rows]
@@ -247,7 +282,17 @@ class Storage:
     def get_trace(self, trace_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         with self._connect() as conn:
             trace_row = conn.execute(
-                "SELECT * FROM traces WHERE id = ?",
+                """
+                SELECT
+                    traces.*,
+                    COALESCE(SUM(steps.tokens_total), 0) AS tokens_total,
+                    COALESCE(SUM(steps.cost_usd), 0) AS cost_usd,
+                    MAX(steps.model) AS model
+                FROM traces
+                LEFT JOIN steps ON steps.trace_id = traces.id
+                WHERE traces.id = ?
+                GROUP BY traces.id
+                """,
                 (trace_id,),
             ).fetchone()
             step_rows = conn.execute(
@@ -295,6 +340,9 @@ class Storage:
         data["output"] = self._from_json(data["output"])
         data["metadata"] = self._from_json(data["metadata"])
         data["tags"] = self._from_json(data.get("tags")) or []
+        data["tokens_total"] = data.get("tokens_total") or 0
+        data["cost_usd"] = data.get("cost_usd") or 0.0
+        data["model"] = data.get("model")
         return data
 
     def _step_row_to_dict(self, row: sqlite3.Row) -> dict[str, Any]:

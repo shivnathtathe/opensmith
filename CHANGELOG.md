@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 - 2026-05-05
+
+- Added WebSocket live updates via SQLite polling.
+- Added token and cost rollups from steps to the trace list.
+- Added search and status filters on `/api/traces`.
+- Rebuilt the dashboard with charts, model column, search bar, filter pills, and LIVE indicator.
+
 ## 0.1.1 - 2026-05-05
 
 - Added async function support for `@trace`.
