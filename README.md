@@ -176,6 +176,10 @@ Open `http://localhost:7823`.
 
 Traces are stored locally at `~/.opensmith/traces.db` unless overridden with `opensmith.json` or `set_default_db_path()`.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=shivnathtathe/opensmith&type=Date)](https://star-history.com/#shivnathtathe/opensmith&Date)
+
 ## License
 
 MIT
