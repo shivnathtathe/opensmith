@@ -192,7 +192,13 @@ Traces are stored locally at `~/.opensmith/traces.db` unless overridden with `op
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=shivnathtathe/opensmith&type=Date)](https://star-history.com/#shivnathtathe/opensmith&Date)
+<a href="https://www.star-history.com/?type=date&repos=shivnathtathe%2Fopensmith">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=shivnathtathe/opensmith&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=shivnathtathe/opensmith&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=shivnathtathe/opensmith&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ## License
 
