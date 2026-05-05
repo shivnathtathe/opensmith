@@ -9,7 +9,7 @@ description = "Local-first LLM pipeline tracer. No cloud. No setup."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
-keywords = ["llm", "tracing", "observability", "langsmith", "local", "agent", "debug"]
+keywords = ["llm", "tracing", "observability", "langsmith", "langsmith-alternative", "local", "agent", "debug", "openai", "anthropic", "rag", "mlops"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

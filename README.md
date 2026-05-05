@@ -10,7 +10,7 @@ padding: 20px; display: inline-block;">
  ██████  ██      ███████ ██   ████ ███████ ██      ██ ██    ██    ██   ██ 
 </pre>
 
-**Local-first LLM pipeline tracer. No cloud. No setup.**
+**The open-source, local-first alternative to LangSmith.**
 
 ![PyPI](https://img.shields.io/pypi/v/opensmith)
 ![Python](https://img.shields.io/pypi/pyversions/opensmith)
@@ -23,7 +23,21 @@ padding: 20px; display: inline-block;">
 
 # opensmith
 
-Local-first LLM pipeline tracer. No cloud. No setup.
+The open-source, local-first alternative to LangSmith.
+
+> opensmith is to LangSmith what Ollama is to OpenAI — the local-first, privacy-first alternative.
+
+## Why opensmith?
+
+| | LangSmith | opensmith |
+|--|-----------|-----------|
+| Setup | Cloud account required | pip install opensmith |
+| Data privacy | Sends traces to cloud | 100% local, SQLite only |
+| Framework | Best with LangChain | Works with any Python code |
+| Cost | Free tier then paid | Free forever, open source |
+| Offline | No | Yes |
+| Docker | No | No |
+| Dashboard | Hosted | localhost:7823 |
 
 ## Why opensmith
 
