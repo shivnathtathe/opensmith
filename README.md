@@ -15,6 +15,9 @@ padding: 20px; display: inline-block;">
 ![PyPI](https://img.shields.io/pypi/v/opensmith)
 ![Python](https://img.shields.io/pypi/pyversions/opensmith)
 ![License](https://img.shields.io/github/license/shivnathtathe/opensmith)
+![Downloads](https://img.shields.io/pypi/dm/opensmith)
+![Stars](https://img.shields.io/github/stars/shivnathtathe/opensmith)
+![CI](https://github.com/shivnathtathe/opensmith/actions/workflows/ci.yml/badge.svg)
 
 </div>
 
