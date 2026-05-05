@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>opensmith</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #222222;
+      --text: #ededec;
+      --muted: #888888;
+      --accent: #6366f1;
+      --error: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    button {
+      color: inherit;
+      font: inherit;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: 52px 1fr;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 24px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .logo {
+      font-size: 14px;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .topright {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      white-space: nowrap;
+    }
+
+    .stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat-value {
+      color: var(--text);
+      margin-left: 5px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .text-button {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .text-button:hover {
+      color: var(--text);
+    }
+
+    .text-button.danger {
+      color: var(--error);
+    }
+
+    .content {
+      padding: 14px 20px 24px;
+      overflow: auto;
+    }
+
+    .table-wrap {
+      border-top: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      height: 36px;
+      padding: 0 10px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    th {
+      height: 32px;
+      color: var(--muted);
+      background: var(--bg);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tbody tr.trace-row {
+      cursor: pointer;
+    }
+
+    tbody tr.trace-row:hover td {
+      background: #141414;
+    }
+
+    tbody tr.trace-row.active td {
+      background: #151515;
+    }
+
+    .col-num { width: 48px; }
+    .col-name { width: auto; }
+    .col-latency { width: 130px; }
+    .col-tokens { width: 110px; }
+    .col-cost { width: 110px; }
+    .col-status { width: 90px; }
+    .col-time { width: 120px; }
+
+    .status-ok {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .status-err {
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    .empty {
+      padding: 56px 20px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .detail-row td {
+      height: auto;
+      padding: 0;
+      white-space: normal;
+      background: #0d0d0d;
+    }
+
+    .detail {
+      display: grid;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .io-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .section {
+      min-width: 0;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .section-title {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    pre {
+      margin: 0;
+      min-height: 112px;
+      max-height: 280px;
+      overflow: auto;
+      padding: 10px;
+      color: var(--text);
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .error-block {
+      border: 1px solid var(--error);
+      color: var(--error);
+      background: #120808;
+    }
+
+    .steps-table th,
+    .steps-table td {
+      height: 32px;
+    }
+
+    .steps-table .step-name { width: auto; }
+    .steps-table .step-type { width: 100px; }
+    .steps-table .step-model { width: 180px; }
+    .steps-table .step-latency { width: 110px; }
+    .steps-table .step-tokens { width: 100px; }
+    .steps-table .step-cost { width: 100px; }
+    .steps-table .step-status { width: 80px; }
+
+    .loading {
+      color: var(--muted);
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-rows: auto 1fr;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .topright {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .stats {
+        flex-wrap: wrap;
+      }
+
+      .content {
+        padding: 12px;
+      }
+
+      .io-grid {
+        grid-template-columns: 1fr;
+      }
+
+      th,
+      td {
+        padding: 0 8px;
+      }
+
+      .col-latency,
+      .col-tokens,
+      .col-cost {
+        width: 96px;
+      }
+
+      .col-time {
+        width: 92px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">opensmith</div>
+        <div class="tagline">Local-first LLM pipeline tracer</div>
+      </div>
+      <div class="topright">
+        <div class="stats mono">
+          <span>total traces<span class="stat-value" id="stat-traces">0</span></span>
+          <span>total steps<span class="stat-value" id="stat-steps">0</span></span>
+          <span>total tokens<span class="stat-value" id="stat-tokens">0</span></span>
+          <span>total cost<span class="stat-value" id="stat-cost">$0.000000</span></span>
+        </div>
+        <div class="actions">
+          <button class="text-button" id="refresh-btn" type="button">Refresh</button>
+          <button class="text-button danger" id="clear-btn" type="button">Clear All</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-num">#</th>
+              <th class="col-name">name</th>
+              <th class="col-latency">latency</th>
+              <th class="col-tokens">tokens</th>
+              <th class="col-cost">cost</th>
+              <th class="col-status">status</th>
+              <th class="col-time">time</th>
+            </tr>
+          </thead>
+          <tbody id="traces-body">
+            <tr>
+              <td colspan="7" class="empty">Loading traces...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      traces: [],
+      expandedId: null,
+      details: new Map()
+    };
+
+    const tracesBody = document.getElementById("traces-body");
+    const refreshBtn = document.getElementById("refresh-btn");
+    const clearBtn = document.getElementById("clear-btn");
+
+    refreshBtn.addEventListener("click", () => loadAll());
+    clearBtn.addEventListener("click", clearAll);
+
+    loadAll();
+    setInterval(loadAll, 30000);
+
+    async function loadAll() {
+      await Promise.all([loadStats(), loadTraces()]);
+    }
+
+    async function loadStats() {
+      const stats = await fetchJson("/api/stats");
+      document.getElementById("stat-traces").textContent = formatNumber(stats.total_traces);
+      document.getElementById("stat-steps").textContent = formatNumber(stats.total_steps);
+      document.getElementById("stat-tokens").textContent = formatNumber(stats.total_tokens);
+      document.getElementById("stat-cost").textContent = formatCost(stats.total_cost_usd);
+    }
+
+    async function loadTraces() {
+      state.traces = await fetchJson("/api/traces?limit=100");
+      renderTraces();
+    }
+
+    async function clearAll() {
+      if (!confirm("Clear all traces?")) {
+        return;
+      }
+
+      await fetch("/api/traces", { method: "DELETE" });
+      state.expandedId = null;
+      state.details.clear();
+      await loadAll();
+    }
+
+    async function toggleTrace(traceId) {
+      if (state.expandedId === traceId) {
+        state.expandedId = null;
+        renderTraces();
+        return;
+      }
+
+      state.expandedId = traceId;
+
+      if (!state.details.has(traceId)) {
+        state.details.set(traceId, { loading: true });
+        renderTraces();
+
+        const detail = await fetchJson(`/api/traces/${encodeURIComponent(traceId)}`);
+        state.details.set(traceId, detail);
+      }
+
+      renderTraces();
+    }
+
+    function renderTraces() {
+      tracesBody.innerHTML = "";
+
+      if (!state.traces.length) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="7" class="empty">No traces recorded yet.</td>`;
+        tracesBody.appendChild(row);
+        return;
+      }
+
+      state.traces.forEach((trace, index) => {
+        const row = document.createElement("tr");
+        row.className = `trace-row ${state.expandedId === trace.id ? "active" : ""}`;
+        row.addEventListener("click", () => toggleTrace(trace.id));
+
+        row.innerHTML = `
+          <td class="mono">${index + 1}</td>
+          <td title="${escapeAttr(trace.name || "")}">${escapeHtml(trace.name || "")}</td>
+          <td class="mono">${formatLatency(trace.latency_ms)}</td>
+          <td class="mono">${formatNumber(trace.tokens_total || 0)}</td>
+          <td class="mono">${formatCost(trace.cost_usd || 0)}</td>
+          <td class="${trace.error ? "status-err" : "status-ok"}">${trace.error ? "ERR" : "OK"}</td>
+          <td class="mono">${relativeTime(trace.created_at || trace.start_time)}</td>
+        `;
+
+        tracesBody.appendChild(row);
+
+        if (state.expandedId === trace.id) {
+          tracesBody.appendChild(renderDetailRow(trace.id));
+        }
+      });
+    }
+
+    function renderDetailRow(traceId) {
+      const row = document.createElement("tr");
+      row.className = "detail-row";
+
+      const cell = document.createElement("td");
+      cell.colSpan = 7;
+
+      const detail = state.details.get(traceId);
+      if (!detail || detail.loading) {
+        cell.innerHTML = `<div class="detail loading mono">Loading trace...</div>`;
+        row.appendChild(cell);
+        return row;
+      }
+
+      const trace = detail.trace || {};
+      const steps = detail.steps || [];
+
+      cell.innerHTML = `
+        <div class="detail">
+          ${trace.error ? `<pre class="error-block mono">${escapeHtml(trace.error)}</pre>` : ""}
+          <div class="io-grid">
+            <section class="section">
+              <div class="section-title">Input</div>
+              <pre class="mono">${escapeHtml(formatJson(trace.input))}</pre>
+            </section>
+            <section class="section">
+              <div class="section-title">Output</div>
+              <pre class="mono">${escapeHtml(formatJson(trace.output))}</pre>
+            </section>
+          </div>
+          <section class="section">
+            <div class="section-title">Steps</div>
+            ${renderStepsTable(steps)}
+          </section>
+        </div>
+      `;
+
+      row.appendChild(cell);
+      return row;
+    }
+
+    function renderStepsTable(steps) {
+      if (!steps.length) {
+        return `<div class="empty">No steps recorded for this trace.</div>`;
+      }
+
+      const rows = steps.map((step) => `
+        <tr>
+          <td class="step-name" title="${escapeAttr(step.name || "")}">${escapeHtml(step.name || "")}</td>
+          <td class="step-type">${escapeHtml(step.step_type || "")}</td>
+          <td class="step-model mono" title="${escapeAttr(step.model || "")}">${escapeHtml(step.model || "")}</td>
+          <td class="step-latency mono">${formatLatency(step.latency_ms)}</td>
+          <td class="step-tokens mono">${formatNumber(step.tokens_total || 0)}</td>
+          <td class="step-cost mono">${formatCost(step.cost_usd || 0)}</td>
+          <td class="step-status ${step.error ? "status-err" : "status-ok"}">${step.error ? "ERR" : "OK"}</td>
+        </tr>
+      `).join("");
+
+      return `
+        <table class="steps-table">
+          <thead>
+            <tr>
+              <th class="step-name">name</th>
+              <th class="step-type">type</th>
+              <th class="step-model">model</th>
+              <th class="step-latency">latency</th>
+              <th class="step-tokens">tokens</th>
+              <th class="step-cost">cost</th>
+              <th class="step-status">status</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    async function fetchJson(url, options) {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+      return response.json();
+    }
+
+    function formatJson(value) {
+      if (value === null || value === undefined || value === "") {
+        return "";
+      }
+
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return String(value);
+      }
+    }
+
+    function formatLatency(value) {
+      if (value === null || value === undefined || value === "") {
+        return "";
+      }
+
+      const number = Number(value);
+      if (!Number.isFinite(number)) {
+        return "";
+      }
+
+      return number.toFixed(2);
+    }
+
+    function formatNumber(value) {
+      const number = Number(value || 0);
+      if (!Number.isFinite(number)) {
+        return "0";
+      }
+
+      return new Intl.NumberFormat().format(Math.round(number));
+    }
+
+    function formatCost(value) {
+      const number = Number(value || 0);
+      if (!Number.isFinite(number)) {
+        return "$0.000000";
+      }
+
+      return `$${number.toFixed(6)}`;
+    }
+
+    function relativeTime(timestamp) {
+      if (!timestamp) {
+        return "";
+      }
+
+      const seconds = Math.max(0, Math.floor(Date.now() / 1000 - Number(timestamp)));
+
+      if (seconds < 60) {
+        return `${seconds}s ago`;
+      }
+
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) {
+        return `${minutes}m ago`;
+      }
+
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) {
+        return `${hours}h ago`;
+      }
+
+      const days = Math.floor(hours / 24);
+      return `${days}d ago`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value);
+    }
+  </script>
+</body>
+</html>

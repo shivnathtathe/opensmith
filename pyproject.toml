@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "opensmith"
+version = "0.1.0"
+description = "Local-first LLM pipeline tracer. No cloud. No setup."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+keywords = ["llm", "tracing", "observability", "langsmith", "local", "agent", "debug"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Debuggers",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "click>=8.0.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+]
+
+[project.urls]
+Homepage = "https://github.com/shivnathtathe/opensmith"
+
+[project.scripts]
+opensmith = "opensmith.cli:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["opensmith"]
