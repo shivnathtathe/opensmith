@@ -37,6 +37,11 @@ otel = [
 postgres = [
     "psycopg2-binary",
 ]
+all = [
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp-proto-http",
+    "psycopg2-binary",
+]
 
 [project.urls]
 Homepage = "https://github.com/shivnathtathe/opensmith"
