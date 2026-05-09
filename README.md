@@ -49,6 +49,13 @@ LangSmith is powerful, but it is built around cloud-hosted tracing and is most n
 pip install opensmith
 ```
 
+Optional integrations:
+
+```bash
+pip install "opensmith[otel]"
+pip install "opensmith[postgres]"
+```
+
 ## Quickstart
 
 ### Example 1: `@trace` decorator
@@ -164,7 +171,7 @@ opensmith ui
 
 Open `http://localhost:7823`.
 
-![dashboard](docs/dashboard.png)
+![dashboard](https://raw.githubusercontent.com/shivnathtathe/opensmith/main/docs/dashboard.png)
 
 ## CLI reference
 
@@ -173,6 +180,7 @@ Open `http://localhost:7823`.
 | `opensmith ui` | Start the local dashboard at `localhost:7823`. |
 | `opensmith traces` | List recent traces in the terminal. |
 | `opensmith stats` | Show aggregate trace, step, token, and cost statistics. |
+| `opensmith export` | Export traces to JSON or CSV. |
 | `opensmith clear` | Delete all locally stored traces after confirmation. |
 
 ## Supported backends
@@ -189,6 +197,37 @@ Open `http://localhost:7823`.
 ## Storage
 
 Traces are stored locally at `~/.opensmith/traces.db` unless overridden with `opensmith.json` or `set_default_db_path()`.
+
+Use Postgres instead by installing `opensmith[postgres]` and setting `OPENSMITH_DB_URL`:
+
+```bash
+export OPENSMITH_DB_URL="postgresql://user:pass@localhost:5432/opensmith"
+```
+
+## Export
+
+Export traces with nested steps as JSON:
+
+```bash
+opensmith export --format json --output traces.json
+```
+
+Export a flat trace list as CSV:
+
+```bash
+opensmith export --format csv --output traces.csv
+```
+
+## OpenTelemetry
+
+OpenTelemetry export is disabled by default. Install the optional dependencies and set `OPENSMITH_OTEL_ENDPOINT` to enable OTLP HTTP export:
+
+```bash
+pip install "opensmith[otel]"
+export OPENSMITH_OTEL_ENDPOINT="http://localhost:4318"
+```
+
+opensmith sends traces to `/v1/traces` and metrics to `/v1/metrics` under that endpoint.
 
 ## Star History
 
