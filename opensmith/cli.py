@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import csv
+import json
 import time
+from pathlib import Path
 from typing import Any
 
 import click
@@ -54,6 +57,75 @@ def stats() -> None:
     table.add_row("Total cost (USD)", f"${float(data['total_cost_usd']):.6f}")
 
     console.print(table)
+
+
+@cli.command(name="export")
+@click.option(
+    "--format",
+    "export_format",
+    default="json",
+    show_default=True,
+    type=click.Choice(["json", "csv"]),
+)
+@click.option("--output", default=None)
+@click.option("--limit", default=None, type=int)
+def export_traces(
+    export_format: str,
+    output: str | None,
+    limit: int | None,
+) -> None:
+    """Export traces to JSON or CSV."""
+    storage = Storage()
+    trace_limit = limit if limit is not None else 1_000_000
+    traces = storage.get_traces(limit=trace_limit)
+    output_path = Path(output or f"opensmith-export.{export_format}")
+
+    if export_format == "json":
+        payload = []
+        for trace in traces:
+            _, steps = storage.get_trace(trace["id"])
+            trace_with_steps = dict(trace)
+            trace_with_steps["steps"] = steps
+            payload.append(trace_with_steps)
+
+        output_path.write_text(
+            json.dumps(payload, indent=2, default=str),
+            encoding="utf-8",
+        )
+    else:
+        with output_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(
+                file,
+                fieldnames=[
+                    "id",
+                    "name",
+                    "latency_ms",
+                    "tokens_total",
+                    "cost_usd",
+                    "error",
+                    "tags",
+                    "created_at",
+                    "model",
+                ],
+            )
+            writer.writeheader()
+
+            for trace in traces:
+                writer.writerow(
+                    {
+                        "id": trace.get("id", ""),
+                        "name": trace.get("name", ""),
+                        "latency_ms": trace.get("latency_ms", ""),
+                        "tokens_total": trace.get("tokens_total", ""),
+                        "cost_usd": trace.get("cost_usd", ""),
+                        "error": trace.get("error", ""),
+                        "tags": ",".join(trace.get("tags") or []),
+                        "created_at": trace.get("created_at", ""),
+                        "model": trace.get("model", ""),
+                    }
+                )
+
+    click.echo(f"Exported {len(traces)} traces to {output_path}")
 
 
 @cli.command()

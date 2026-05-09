@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from opensmith.models import Step, Trace
 from opensmith.storage import Storage
 
@@ -218,3 +220,35 @@ def test_get_trace_returns_rollups(
     assert trace["tokens_total"] == 42
     assert trace["cost_usd"] == 0.000105
     assert trace["model"] == "gpt-4o-mini"
+
+
+def test_postgres_backend_uses_sqlite_without_env(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv("OPENSMITH_DB_URL", raising=False)
+
+    storage = Storage(tmp_path / "traces.db")
+
+    assert storage._backend == "sqlite"
+    assert storage.db_path == tmp_path / "traces.db"
+
+
+def test_postgres_env_var_detected(monkeypatch) -> None:
+    db_url = "postgresql://user:pass@localhost:5432/opensmith"
+    monkeypatch.setenv("OPENSMITH_DB_URL", db_url)
+    monkeypatch.setattr(Storage, "_init_db", lambda self: None)
+
+    storage = Storage()
+
+    assert storage._backend == "postgres"
+    assert storage._db_url == db_url
+    assert storage.db_path is None
+
+
+@pytest.mark.skip(reason="requires Postgres")
+def test_postgres_connection_roundtrip() -> None:
+    storage = Storage()
+    trace = Trace(name="postgres_trace")
+
+    storage.save_trace(trace)
+
+    saved, _ = storage.get_trace(trace.id)
+    assert saved["id"] == trace.id

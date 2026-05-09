@@ -24,6 +24,23 @@ Print aggregate trace statistics.
 opensmith stats
 ```
 
+## `opensmith export`
+
+Export traces to JSON or CSV.
+
+```bash
+opensmith export --format json --output traces.json
+opensmith export --format csv --output traces.csv
+```
+
+JSON exports include each trace with its nested `steps`. CSV exports include a flat trace list with `id`, `name`, `latency_ms`, `tokens_total`, `cost_usd`, `error`, `tags`, `created_at`, and `model` columns.
+
+Limit the number of exported traces:
+
+```bash
+opensmith export --limit 100
+```
+
 ## `opensmith clear`
 
 Delete all stored traces after confirmation.

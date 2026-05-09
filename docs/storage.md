@@ -23,6 +23,17 @@ Or with `opensmith.json`:
 }
 ```
 
+## Postgres
+
+SQLite remains the default backend. To use Postgres, install the optional dependency and set `OPENSMITH_DB_URL`:
+
+```bash
+pip install "opensmith[postgres]"
+export OPENSMITH_DB_URL="postgresql://user:pass@localhost:5432/opensmith"
+```
+
+When `OPENSMITH_DB_URL` is set, `Storage()` writes traces and steps to Postgres using the same API. If the variable is not set, opensmith uses local SQLite.
+
 ## Tables
 
 ### `traces`
