@@ -54,7 +54,10 @@ Optional integrations:
 ```bash
 pip install "opensmith[otel]"
 pip install "opensmith[postgres]"
+pip install "opensmith[all]"
 ```
+
+Use `opensmith[all]` to install both OpenTelemetry and Postgres support.
 
 ## Quickstart
 
@@ -203,6 +206,8 @@ Use Postgres instead by installing `opensmith[postgres]` and setting `OPENSMITH_
 ```bash
 export OPENSMITH_DB_URL="postgresql://user:pass@localhost:5432/opensmith"
 ```
+
+Install both Postgres and OpenTelemetry support with `pip install "opensmith[all]"`.
 
 ## Export
 

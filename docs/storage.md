@@ -29,6 +29,7 @@ SQLite remains the default backend. To use Postgres, install the optional depend
 
 ```bash
 pip install "opensmith[postgres]"
+pip install "opensmith[all]"
 export OPENSMITH_DB_URL="postgresql://user:pass@localhost:5432/opensmith"
 ```
 

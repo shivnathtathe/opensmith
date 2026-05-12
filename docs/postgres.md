@@ -8,6 +8,12 @@ Install the optional dependency:
 pip install "opensmith[postgres]"
 ```
 
+Or install all optional integrations:
+
+```bash
+pip install "opensmith[all]"
+```
+
 Set the database URL:
 
 ```bash

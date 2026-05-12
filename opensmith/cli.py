@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import csv
+import io
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -14,12 +16,38 @@ from rich.table import Table
 from opensmith.storage import Storage
 
 
-console = Console()
+console = Console(
+    file=io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace"),
+    legacy_windows=False,
+)
 
 
-@click.group(name="opensmith")
-def cli() -> None:
+def _get_version() -> str:
+    try:
+        from importlib.metadata import version
+
+        return version("opensmith")
+    except Exception:
+        return "0.1.3"
+
+
+def _print_banner() -> None:
+    console.print("""     [bold #888888]╔═╗╔═╗╔═╗╔╗╔[/bold #888888][bold #ededec]╔═╗╔╦╗╦╔╦╗╦ ╦[/bold #ededec]
+     [bold #888888]║ ║╠═╝║╣ ║║║[/bold #888888][bold #ededec]╚═╗║║║║ ║ ╠═╣[/bold #ededec]
+     [bold #888888]╚═╝╩  ╚═╝╝╚╝[/bold #888888][bold #ededec]╚═╝╩ ╩╩ ╩ ╩ ╩[/bold #ededec]""")
+    console.print(
+        "[#888888]Local-first LLM pipeline tracer  "
+        "[#d29922]v" + _get_version() + "[/#d29922]\n"
+    )
+
+
+@click.group(name="opensmith", invoke_without_command=True)
+@click.pass_context
+def cli(ctx: click.Context) -> None:
     """Local-first LLM pipeline tracer."""
+    if ctx.invoked_subcommand is None:
+        _print_banner()
+        click.echo(ctx.get_help())
 
 
 @cli.command()

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 - 2026-05-09
+
+- Added ASCII banner to the CLI when running `opensmith` without a subcommand.
+- Added `pip install "opensmith[all]"` optional dependency group for OpenTelemetry and Postgres support together.
+
 ## 0.1.3 - 2026-05-09
 
 - Added optional OpenTelemetry export via `OPENSMITH_OTEL_ENDPOINT` and `opensmith[otel]`.

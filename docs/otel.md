@@ -8,6 +8,12 @@ Install the optional dependencies:
 pip install "opensmith[otel]"
 ```
 
+Or install all optional integrations:
+
+```bash
+pip install "opensmith[all]"
+```
+
 Set the OTLP HTTP base endpoint:
 
 ```bash
