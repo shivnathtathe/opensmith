@@ -1,11 +1,27 @@
 # CLI Reference
 
+## `opensmith init`
+
+Create a starter `opensmith.json` config in the current directory.
+
+```bash
+opensmith init
+```
+
+If `opensmith.json` already exists, opensmith asks before overwriting it.
+
 ## `opensmith ui`
 
-Start the local dashboard.
+Start the local dashboard. If the requested port is in use, opensmith automatically tries the next available port.
 
 ```bash
 opensmith ui --host 127.0.0.1 --port 7823
+```
+
+Disable automatic port selection:
+
+```bash
+opensmith ui --no-auto-port
 ```
 
 ## `opensmith traces`
@@ -15,6 +31,15 @@ List recent traces.
 ```bash
 opensmith traces --limit 20
 ```
+
+Filter traces by search text, status, and tags:
+
+```bash
+opensmith traces --q rag --status err --tags production --limit 20
+opensmith traces --tags rag,production
+```
+
+`--q` searches trace name, input, and output. `--status` accepts `ok` or `err`. `--tags` accepts comma-separated tags.
 
 ## `opensmith stats`
 

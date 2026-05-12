@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from opensmith.models import Step
 from opensmith.storage import Storage
 from opensmith.tracer import TraceCallable, trace
 
@@ -191,3 +192,61 @@ def test_context_manager_with_tags(tmp_storage: Storage) -> None:
 
     traces = tmp_storage.get_traces()
     assert traces[0]["tags"] == ["debug"]
+
+
+def test_token_budget_no_warning_when_not_exceeded(
+    tmp_storage: Storage,
+    capsys,
+) -> None:
+    local_trace = TraceCallable(storage=tmp_storage)
+
+    with local_trace("my_pipeline", token_budget=1000) as t:
+        t.trace.steps.append(
+            Step(name="llm", tokens_total=999, step_type="llm")
+        )
+
+    output = capsys.readouterr().out
+    trace_record, _ = tmp_storage.get_trace(tmp_storage.get_traces()[0]["id"])
+
+    assert "used" not in output
+    assert trace_record["metadata"] is None
+
+
+def test_token_budget_warning_when_exceeded(
+    tmp_storage: Storage,
+    capsys,
+) -> None:
+    local_trace = TraceCallable(storage=tmp_storage)
+
+    with local_trace("my_pipeline", token_budget=1000) as t:
+        t.trace.steps.append(
+            Step(name="llm", tokens_total=1247, step_type="llm")
+        )
+
+    output = capsys.readouterr().out
+    trace_record, _ = tmp_storage.get_trace(tmp_storage.get_traces()[0]["id"])
+
+    assert "⚠ my_pipeline used 1,247 tokens (budget: 1,000)" in output
+    assert trace_record["metadata"] == {
+        "token_budget_exceeded": True,
+        "token_budget": 1000,
+        "tokens_used": 1247,
+    }
+
+
+def test_token_budget_none_by_default_no_warning(
+    tmp_storage: Storage,
+    capsys,
+) -> None:
+    local_trace = TraceCallable(storage=tmp_storage)
+
+    with local_trace("my_pipeline") as t:
+        t.trace.steps.append(
+            Step(name="llm", tokens_total=1247, step_type="llm")
+        )
+
+    output = capsys.readouterr().out
+    trace_record, _ = tmp_storage.get_trace(tmp_storage.get_traces()[0]["id"])
+
+    assert "used" not in output
+    assert trace_record["metadata"] is None

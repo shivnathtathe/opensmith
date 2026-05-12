@@ -96,6 +96,17 @@ async def call_llm(prompt: str):
     )
 ```
 
+Warn when a trace exceeds a token budget:
+
+```python
+from opensmith import trace
+
+
+@trace(token_budget=1000)
+def my_pipeline():
+    return call_llm("summarize this document")
+```
+
 ### Example 2: context manager
 
 ```python
@@ -158,6 +169,12 @@ def my_func():
 
 opensmith reads `opensmith.json` from the current working directory on import:
 
+Create a starter config:
+
+```bash
+opensmith init
+```
+
 ```json
 {
   "db_path": "./my_traces.db",
@@ -172,7 +189,7 @@ opensmith reads `opensmith.json` from the current working directory on import:
 opensmith ui
 ```
 
-Open `http://localhost:7823`.
+Open `http://localhost:7823`. If the port is already in use, opensmith automatically tries the next available port. Use `--no-auto-port` to disable this behavior.
 
 ![dashboard](https://raw.githubusercontent.com/shivnathtathe/opensmith/main/docs/dashboard.png)
 
@@ -180,8 +197,9 @@ Open `http://localhost:7823`.
 
 | Command | Description |
 | --- | --- |
-| `opensmith ui` | Start the local dashboard at `localhost:7823`. |
-| `opensmith traces` | List recent traces in the terminal. |
+| `opensmith init` | Create a starter `opensmith.json` config. |
+| `opensmith ui` | Start the local dashboard with automatic port selection. |
+| `opensmith traces --q rag --status err --tags production` | List and filter traces in the terminal. |
 | `opensmith stats` | Show aggregate trace, step, token, and cost statistics. |
 | `opensmith export` | Export traces to JSON or CSV. |
 | `opensmith clear` | Delete all locally stored traces after confirmation. |

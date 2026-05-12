@@ -41,6 +41,22 @@ def _print_banner() -> None:
     )
 
 
+def _find_free_port(start: int, max_attempts: int = 10) -> int:
+    import socket
+
+    for port in range(start, start + max_attempts):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.bind(("127.0.0.1", port))
+                return port
+            except OSError:
+                continue
+
+    raise RuntimeError(
+        f"No free port found in range {start}-{start + max_attempts - 1}"
+    )
+
+
 @click.group(name="opensmith", invoke_without_command=True)
 @click.pass_context
 def cli(ctx: click.Context) -> None:
@@ -53,11 +69,27 @@ def cli(ctx: click.Context) -> None:
 @cli.command()
 @click.option("--port", default=7823, show_default=True, type=int)
 @click.option("--host", default="127.0.0.1", show_default=True)
-def ui(port: int, host: str) -> None:
+@click.option(
+    "--no-auto-port",
+    is_flag=True,
+    default=False,
+    help="Disable automatic port selection",
+)
+def ui(port: int, host: str, no_auto_port: bool) -> None:
     """Start the local dashboard."""
-    click.echo(f"opensmith UI running at http://{host}:{port}")
+    if not no_auto_port:
+        actual_port = _find_free_port(port)
+        if actual_port != port:
+            click.echo(
+                f"Port {port} is in use. "
+                f"Using port {actual_port} instead."
+            )
+    else:
+        actual_port = port
+
+    click.echo(f"opensmith UI running at http://{host}:{actual_port}")
     click.echo("Press Ctrl+C to stop")
-    uvicorn.run("opensmith.server:app", host=host, port=port)
+    uvicorn.run("opensmith.server:app", host=host, port=actual_port)
 
 
 @cli.command()
@@ -68,6 +100,29 @@ def clear() -> None:
 
     Storage().delete_all()
     click.echo("Cleared all traces.")
+
+
+@cli.command()
+def init() -> None:
+    """Create a starter opensmith.json config."""
+    config_path = Path("opensmith.json")
+
+    if config_path.exists() and not click.confirm(
+        "opensmith.json already exists. Overwrite?",
+        default=False,
+    ):
+        return
+
+    config = {
+        "db_path": "~/.opensmith/traces.db",
+        "console_mode": False,
+        "autopatch": [],
+    }
+    config_path.write_text(
+        json.dumps(config, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    click.echo("Created opensmith.json")
 
 
 @cli.command()
@@ -157,10 +212,32 @@ def export_traces(
 
 
 @cli.command()
+@click.option("--q", default=None)
+@click.option(
+    "--status",
+    default=None,
+    type=click.Choice(["ok", "err"]),
+)
+@click.option("--tags", default=None)
 @click.option("--limit", default=20, show_default=True, type=int)
-def traces(limit: int) -> None:
+def traces(
+    q: str | None,
+    status: str | None,
+    tags: str | None,
+    limit: int,
+) -> None:
     """List recent traces."""
-    rows = Storage().get_traces(limit=limit)
+    tag_filters = (
+        [tag.strip() for tag in tags.split(",") if tag.strip()]
+        if tags
+        else None
+    )
+    rows = Storage().get_traces(
+        limit=limit,
+        q=q,
+        status=status,
+        tags=tag_filters,
+    )
 
     table = Table(title="opensmith traces")
     table.add_column("id")

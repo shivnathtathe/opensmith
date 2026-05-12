@@ -8,6 +8,8 @@ from collections.abc import Awaitable, Callable
 from types import TracebackType
 from typing import Any, ParamSpec, TypeVar
 
+from rich.console import Console
+
 from opensmith.models import Trace
 from opensmith.storage import Storage
 
@@ -16,6 +18,7 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 _state = threading.local()
+_token_budget_console = Console(legacy_windows=False)
 
 
 def _trace_stack() -> list[str]:
@@ -40,15 +43,41 @@ def _maybe_print_trace(trace_record: Trace) -> None:
         print_trace(trace_record)
 
 
+def _apply_token_budget(trace_record: Trace, token_budget: int | None) -> None:
+    if token_budget is None:
+        return
+
+    tokens_used = sum(step.tokens_total or 0 for step in trace_record.steps)
+    if tokens_used <= token_budget:
+        return
+
+    if trace_record.metadata is None:
+        trace_record.metadata = {}
+
+    trace_record.metadata.update(
+        {
+            "token_budget_exceeded": True,
+            "token_budget": token_budget,
+            "tokens_used": tokens_used,
+        }
+    )
+    _token_budget_console.print(
+        f"⚠ {trace_record.name} used {tokens_used:,} tokens "
+        f"(budget: {token_budget:,})"
+    )
+
+
 class TraceContext:
     def __init__(
         self,
         name: str,
         metadata: dict[str, Any] | None = None,
         tags: list[str] | None = None,
+        token_budget: int | None = None,
         storage: Storage | None = None,
     ) -> None:
         self.storage = storage or Storage()
+        self.token_budget = token_budget
         self.trace = Trace(
             name=name,
             input={},
@@ -79,6 +108,7 @@ class TraceContext:
         if stack and stack[-1] == self.trace.id:
             stack.pop()
 
+        _apply_token_budget(self.trace, self.token_budget)
         self.storage.save_trace(self.trace)
         _maybe_print_trace(self.trace)
         return False
@@ -100,6 +130,7 @@ class TraceCallable:
         name: str | None = None,
         metadata: dict[str, Any] | None = None,
         tags: list[str] | None = None,
+        token_budget: int | None = None,
     ) -> Callable[[Callable[P, R]], Callable[P, R]] | Callable[P, R] | TraceContext:
         if callable(func_or_name):
             return self._decorate(
@@ -107,6 +138,7 @@ class TraceCallable:
                 name=name,
                 metadata=metadata,
                 tags=tags,
+                token_budget=token_budget,
             )
 
         if isinstance(func_or_name, str) and name is None:
@@ -114,11 +146,18 @@ class TraceCallable:
                 name=func_or_name,
                 metadata=metadata,
                 tags=tags,
+                token_budget=token_budget,
                 storage=self.storage,
             )
 
         def decorator(func: Callable[P, R]) -> Callable[P, R]:
-            return self._decorate(func, name=name, metadata=metadata, tags=tags)
+            return self._decorate(
+                func,
+                name=name,
+                metadata=metadata,
+                tags=tags,
+                token_budget=token_budget,
+            )
 
         return decorator
 
@@ -129,6 +168,7 @@ class TraceCallable:
         name: str | None = None,
         metadata: dict[str, Any] | None = None,
         tags: list[str] | None = None,
+        token_budget: int | None = None,
     ) -> Callable[P, R]:
         trace_name = name or func.__name__
 
@@ -138,6 +178,7 @@ class TraceCallable:
                 name=trace_name,
                 metadata=metadata,
                 tags=tags,
+                token_budget=token_budget,
             )
 
         return self._decorate_sync(
@@ -145,6 +186,7 @@ class TraceCallable:
             name=trace_name,
             metadata=metadata,
             tags=tags,
+            token_budget=token_budget,
         )
 
     def _create_trace(
@@ -171,6 +213,7 @@ class TraceCallable:
         self,
         trace_record: Trace,
         storage: Storage,
+        token_budget: int | None = None,
     ) -> None:
         trace_record.end_time = time.time()
         if trace_record.start_time is not None:
@@ -182,6 +225,7 @@ class TraceCallable:
         if stack and stack[-1] == trace_record.id:
             stack.pop()
 
+        _apply_token_budget(trace_record, token_budget)
         storage.save_trace(trace_record)
         _maybe_print_trace(trace_record)
 
@@ -192,6 +236,7 @@ class TraceCallable:
         name: str,
         metadata: dict[str, Any] | None = None,
         tags: list[str] | None = None,
+        token_budget: int | None = None,
     ) -> Callable[P, R]:
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
@@ -210,7 +255,7 @@ class TraceCallable:
                 result = func(*args, **kwargs)
             except Exception as exc:
                 trace_record.error = repr(exc)
-                self._finish_trace(trace_record, storage)
+                self._finish_trace(trace_record, storage, token_budget=token_budget)
                 raise
 
             if inspect.isawaitable(result):
@@ -223,12 +268,16 @@ class TraceCallable:
                         trace_record.error = repr(exc)
                         raise
                     finally:
-                        self._finish_trace(trace_record, storage)
+                        self._finish_trace(
+                            trace_record,
+                            storage,
+                            token_budget=token_budget,
+                        )
 
                 return await_and_finish()
 
             trace_record.output = {"result": result}
-            self._finish_trace(trace_record, storage)
+            self._finish_trace(trace_record, storage, token_budget=token_budget)
             return result
 
         return wrapper
@@ -240,6 +289,7 @@ class TraceCallable:
         name: str,
         metadata: dict[str, Any] | None = None,
         tags: list[str] | None = None,
+        token_budget: int | None = None,
     ) -> Callable[P, Awaitable[R]]:
         @functools.wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
@@ -263,7 +313,7 @@ class TraceCallable:
                 trace_record.error = repr(exc)
                 raise
             finally:
-                self._finish_trace(trace_record, storage)
+                self._finish_trace(trace_record, storage, token_budget=token_budget)
 
         return wrapper
 

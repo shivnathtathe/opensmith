@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.5 - 2026-05-09
+
+- Added `opensmith init` command for creating a starter `opensmith.json` config.
+- Added `opensmith traces --q --status --tags` filters.
+- Added `@trace(token_budget=N)` alerts with warning metadata.
+- Added auto port detection for `opensmith ui`.
+
 ## 0.1.4 - 2026-05-09
 
 - Added ASCII banner to the CLI when running `opensmith` without a subcommand.
